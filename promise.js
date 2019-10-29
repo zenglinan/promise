@@ -18,15 +18,15 @@ class MyPromise{
   constructor(executor){
     this.value = ''  // resolve 的值
     this.reson = ''  // reject 的值
-    this.state = 'pedding'  // 当前 Promise 的状态
+    this.state = 'pending'  // 当前 Promise 的状态
     const resolve = (value) => {  // 写成箭头函数，保证 this
-      if(this.state === 'pedding'){  // 只有 pedding 态可修改，并且不可逆
+      if(this.state === 'pending'){  // 只有 pedding 态可修改，并且不可逆
         this.state = 'fulfilled'
         this.value = value
       }
     }
     const reject = (reson) => {
-      if(this.state === 'pedding'){
+      if(this.state === 'pending'){
         this.state = 'rejected'
         this.reson = reson
       }
