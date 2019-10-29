@@ -1,6 +1,6 @@
 // const promise = new MyPromise((resolve, reject) => {
+//   throw Error('发生异常！')
 //   reject('123')
-//   resolve(123)
 // })
 
 // promise.then((value) => {
@@ -12,6 +12,7 @@
 // 实现功能：
 // 1. 实现 promise 基本结构和三种状态切换
 // 2. 实现基本的 then 方法，根据状态判断执行的回调
+// 3. 当 executor 发生异常时，进行捕获并 reject
 
 class MyPromise{
   constructor(executor){
@@ -30,7 +31,11 @@ class MyPromise{
         this.reson = reson
       }
     }
-    executor(resolve, reject)
+    try {
+      executor(resolve, reject)
+    } catch (e){
+      reject(e)
+    }
   }
   then(onfulfilled, onrejected){  // 根据 promise 状态执行对应回调
     if(this.state === 'fulfilled'){
