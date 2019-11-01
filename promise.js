@@ -53,6 +53,7 @@ class MyPromise {
       reject(e)
     }
   }
+  
   then(onfulfilled = v=>v, onrejected = r=>r) { // 如果不传，默认将结果传递给下一个 then
     const promise2 = new Promise((resolve, reject) => {
       // 同步
@@ -65,7 +66,6 @@ class MyPromise {
             reject(e)
           }
         }, 0)
-
       } else if (this.state === 'rejected') {
         setTimeout(() => {
           try {
@@ -99,6 +99,10 @@ class MyPromise {
     })
     return promise2 // then 返回一个新的 promise
   }
+  
+  catch(rejectFn){
+    return this.then(null, rejectFn)
+  }
 }
 
 function resolvePromise(promise2, x, resolve, reject) {
@@ -123,4 +127,16 @@ function resolvePromise(promise2, x, resolve, reject) {
   } else { // 其他值，直接 resolve
     resolve(x)
   }
+}
+
+Promise.resolve = function(value){
+  return new Promise((resolve, reject) => {
+    resolve(value)
+  })
+}
+
+Promise.reject = function(reson){
+  return new Promise((resolve, reject) => {
+    reject(reson)
+  })
 }
