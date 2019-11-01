@@ -47,7 +47,7 @@ class MyPromise {
       reject(e)
     }
   }
-  then(onfulfilled, onrejected) { // 根据 promise 状态执行对应回调
+  then(onfulfilled = v=>v, onrejected = r=>r) { // 如果不传，默认将结果传递给下一个 then
     const promise2 = new Promise((resolve, reject) => {
       // 同步
       if (this.state === 'fulfilled') {
