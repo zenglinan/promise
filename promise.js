@@ -1,16 +1,18 @@
 // promise 失败只有三种可能，一种是发生错误，一种是返回了一个失败的 promise，一种是主动 reject
 
-// const promise = new MyPromise((resolve, reject) => {
-//   setTimeout(() => {
-//     resolve('成功')
-//   }, 0)
+// 例：
+// const p1 = new MyPromise((resolve, reject) => {
+//   resolve(new MyPromise((resolve, reject) => {
+//     resolve('sssss')
+//   }))
 // })
 
-// promise.then((value) => {
-//   console.log('success', value)  
+// const p2 = p1.then((value) => {
+//   console.log(value)  /* excpeted: sssss */ 
 // }, (reson) => {
 //   console.log('fail', reson)
 // })
+
 
 // 实现功能：
 // 1. 实现 promise 基本结构和三种状态切换
@@ -19,7 +21,7 @@
 // 4. 如果 then 执行时，仍未执行 resolve 或 reject，先把回调函数存起来，当 resolve 或 reject 执行时，再执行回调
 // 5. 每个 then 返回一个新的 promise，将每个 then 回调的 返回值/发生的错误 传递给下一个 then
 // 6. 将 then 中 return 的结果传给下一个 then，注意返回值可能依然是一个 promise，要用 resolvePromise 方法进行处理
-
+// 7. 第一次 new Promise 时，resolve 的值如果是一个 promise，传给 then 的应该是这个 promise 执行完的结果，而不是这个 promise 本身
 class MyPromise {
   constructor(executor) {
     this.value = '' // resolve 的值
@@ -28,6 +30,10 @@ class MyPromise {
     this.resolveCallbacks = [] // 存放异步 resolve 的回调
     this.rejectCallbacks = [] // 存放异步 reject 的回调
     const resolve = (value) => { // 写成箭头函数，保证 this
+      if(value instanceof MyPromise || value instanceof Promise){// 第一次 new Promise 时（例：↑），resolve 的值如果是一个 promise
+        // 调用 then，传入 resolve，resolve 中又进行是否为 promise 的判断调用，递归调用直到 value 不是一个 promise
+        return value.then(resolve, reject)        
+      }
       if (this.state === 'pending') { // 只有 pedding 态可修改，并且不可逆
         this.state = 'fulfilled'
         this.value = value
