@@ -129,14 +129,61 @@ function resolvePromise(promise2, x, resolve, reject) {
   }
 }
 
-Promise.resolve = function(value){
+MyPromise.resolve = function(value){
   return new Promise((resolve, reject) => {
     resolve(value)
   })
 }
 
-Promise.reject = function(reson){
+MyPromise.reject = function(reson){
   return new Promise((resolve, reject) => {
     reject(reson)
+  })
+}
+
+MyPromise.all = function (p) {
+  return new Promise((resolve, reject) => {
+    let count = 0
+    const result = []  // 存放 p 里每个 promise resolve 的值
+
+    function processData(index, value) {  // 存放每个 promise resolve 的值，并计数，计数完成后 resolve result
+      result[index] = value
+      if (++count === p.length) {
+        resolve(result)
+      }
+    }
+    p.forEach((cur, index) => {
+      if (typeof cur === 'function' || (typeof cur === 'object' && cur !== null)) { // 可能是 promise
+        if (typeof cur.then === 'function') { // 是一个 promise
+          cur.then(v => {
+            processData(index, v)
+          }, r => {
+            reject(r) // 只要任何一个 promise 出错，就 reject
+          })
+        } else { // 只是一个普通对象
+          processData(index, cur)
+        }
+      } else { // 其他基本类型
+        processData(index, cur)
+      }
+    })
+  })
+}
+
+MyPromise.race = function (p) {
+  return new Promise((resolve, reject) => { // 只要一个完成了，直接 resolve 出来的值就是最快执行完的
+    p.forEach(cur => {
+      if(typeof cur === 'function' || (typeof cur === 'object' && cur !== null)){
+        if(typeof cur.then === 'function'){ // 是一个 promise
+          cur.then(r => { // 拿到 cur resolve 的结果后直接调用最外层 Promise 的 resolve
+            resolve(r)
+          })
+        }else{  // 不是 promise，直接 resolve
+          resolve(cur)
+        }
+      }else { // 不是 promise，直接 resolve
+        resolve(cur)
+      }
+    })
   })
 }
